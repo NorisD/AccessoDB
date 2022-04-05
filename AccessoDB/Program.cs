@@ -21,7 +21,7 @@ namespace AccessoDB
                 {
                     command.CommandType = CommandType.StoredProcedure;
                     command.Parameters.Add("@newCOD", SqlDbType.NVarChar);
-                    command.Parameters["newCOD"].Value = newCodice;
+                    command.Parameters["@newCOD"].Value = newCodice;
                     try
                     {
                         command.Connection.Open();
@@ -72,16 +72,51 @@ namespace AccessoDB
 
             }
         }
+        private static DataSet CreaDataSet(string cStoreProcedur, string cCliente, string conectionString)
+        {
+            using (SqlConnection connection = new SqlConnection(conectionString))
+            {
+                using (SqlCommand command = new SqlCommand(cStoreProcedur, connection))
+                {
+                    command.CommandType = CommandType.StoredProcedure;
+                   /* 
+                    * command.Parameters.Add("@Cliente", SqlDbType.NVarChar);
+                    * command.Parameters["@Cliente"].Value = cCliente;
+                   */
+
+
+                    try
+                    {
+                        DataSet ds = new DataSet();
+                        command.Connection.Open();
+
+                        using (SqlDataAdapter da = new SqlDataAdapter(command))
+                        {
+                            da.SelectCommand.Parameters.AddWithValue("@Cliente",cCliente);
+                            da.Fill(ds, "brogliaccio");
+                        }
+                        return ds;
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.Message);
+                        return null;
+                    }
+                }
+
+            }
+        }
         static void Main(string[] args)
         {
             var cnn = ConfigurationManager.ConnectionStrings["DemoAHR"].ConnectionString;
 
            // CreateCommand1("dbo.creaTest", cnn);  // Storeprocedure
 
-            CommandExecureQuery("ZvA", "Descri Zaa", cnn);
-            CommandExecureQuery("ZlA", "Descri Zaa", cnn);
+           // CommandExecureQuery("ZvA", "Descri Zaa", cnn);
+           // CommandExecureQuery("ZlA", "Descri Zaa", cnn);
 
             //
+            CreaDataSet("listBrogliaccioOR","CED", cnn);
         }
     }
 }
