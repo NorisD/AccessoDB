@@ -106,17 +106,53 @@ namespace AccessoDB
 
             }
         }
+        private static string retornaValore(string cStoreProcedur, string cCliente, string conectionString)
+        {
+            using (SqlConnection connection = new SqlConnection(conectionString))
+            {
+                using (SqlCommand command = new SqlCommand(cStoreProcedur, connection))
+                {
+                    command.CommandType=CommandType.StoredProcedure;
+                    try
+                    {
+                        command.Parameters.AddWithValue("@Cliente", cCliente);
+
+                        SqlParameter outputpar = new SqlParameter();
+                        outputpar.ParameterName = "@Importo";
+                        outputpar.SqlDbType = SqlDbType.NVarChar;
+                        outputpar.Size = 30;
+                        outputpar.Direction = ParameterDirection.Output;
+
+                        command.Parameters.Add(outputpar);
+
+                        command.Connection.Open();
+                        command.ExecuteNonQuery();
+                        return outputpar.Value.ToString();
+                    }
+                    catch(Exception ex)
+                    {
+                        MessageBox.Show(ex.Message);
+                        return "x";
+                    }
+                }
+            }
+        }
         static void Main(string[] args)
         {
             var cnn = ConfigurationManager.ConnectionStrings["DemoAHR"].ConnectionString;
 
-           // CreateCommand1("dbo.creaTest", cnn);  // Storeprocedure
+            // CreateCommand1("dbo.creaTest", cnn);  // Storeprocedure
 
-           // CommandExecureQuery("ZvA", "Descri Zaa", cnn);
-           // CommandExecureQuery("ZlA", "Descri Zaa", cnn);
+            // CommandExecureQuery("ZvA", "Descri Zaa", cnn);
+            // CommandExecureQuery("ZlA", "Descri Zaa", cnn);
 
-            //
-            CreaDataSet("listBrogliaccioOR","CED", cnn);
+            // CreaDataSet("listBrogliaccioOR","CED", cnn);
+
+            var result = retornaValore("dbo.TotaleOrdine", "BIANCHI", cnn);
+
+            MessageBox.Show(result);
+
+
         }
     }
 }
